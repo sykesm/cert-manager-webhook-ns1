@@ -1,24 +1,24 @@
 IMAGE_NAME := cert-manager-webhook-ns1
 IMAGE_TAG := latest
-REPO_NAME := ns1inc
+REPO_NAME := sykesm
 
 OUT := $(shell pwd)/_out
 
 $(shell mkdir -p "$(OUT)")
 
-.PHONY: all build tag push helm rendered-manifest.yaml
+.PHONY: all build push helm rendered-manifest.yaml
 
 all: ;
 
 # When Go code changes, we need to update the Docker image
 build:
-	docker build -t "$(IMAGE_NAME):$(IMAGE_TAG)" .
-
-tag:
-	docker tag "$(IMAGE_NAME):$(IMAGE_TAG)" "$(REPO_NAME)/$(IMAGE_NAME):$(IMAGE_TAG)"
+	docker buildx create --name multiarch || true
+	docker buildx use multiarch
+	docker buildx build --platform linux/arm/v7,linux/arm64,linux/amd64 --tag "$(IMAGE_NAME):$(IMAGE_TAG)" .
+	docker buildx build --load --tag "$(IMAGE_NAME):$(IMAGE_TAG)" .
 
 push:
-	docker push "$(REPO_NAME)/$(IMAGE_NAME):$(IMAGE_TAG)"
+	docker buildx build --platform linux/arm/v7,linux/arm64,linux/amd64 --push --tag "$(REPO_NAME)/$(IMAGE_NAME):$(IMAGE_TAG)" .
 
 
 # When helm chart changes, we need to publish to the repo (/docs/):
