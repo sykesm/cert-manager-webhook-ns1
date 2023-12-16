@@ -206,7 +206,6 @@ func (c *ns1DNSProviderSolver) setNS1Client(ch *v1alpha1.ChallengeRequest, cfg n
 		)
 	}
 	apiKey := string(apiKeyBytes)
-	// var apiKey string
 
 	httpClient := &http.Client{}
 	if cfg.IgnoreSSL {
